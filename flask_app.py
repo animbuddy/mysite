@@ -83,10 +83,19 @@ def index():
         db.session.commit()
     return redirect(url_for('index'))
 
-@app.route("/users", methods=["GET", "POST"])
+@app.route("/usersTable", methods=["GET", "POST"])
 def usersTable():
+    print(request.form.to_dict())
     if request.method == "GET":
         return render_template("user_page.html", comments=User.query.all())
+    elif "id" in request.form.to_dict():
+        comment = User.query.filter_by(id=int(request.form["id"])).first()
+        print(comment)
+        db.session.delete(comment)
+        db.session.commit()
+    else:
+        print(request.form.to_dict())
+    return redirect(url_for("usersTable"))
 
 @app.route("/login/", methods=["GET", "POST"])
 def login():
@@ -155,18 +164,27 @@ db.session.commit()
 def addLicense(user, email):
     """
     """
-    #print request.args.get('user')
-    #print request.args.get('email')
-
-    days = 30
+    days = 1095
     dbUser = User.query.filter_by(username = user).first()
+    dbEmail = User.query.filter_by(email = email).first()
+
+    if dbUser:
+        #invalid user
+        return {'result' : 1}
+    if dbEmail:
+        #invalid email
+        return {'result' : 2}
+
     if not dbUser:
-        userData = User(username = user,email = email)
+        userData = User(username = user,email = email,trialused = True)
         db.session.add(userData)
         db.session.commit()
         dbUser = User.query.filter_by(username = user).first()
 
     license = generateKey()
+    #if AnimBuddyData.query.filter_by(license = license):
+    #    license = generateKey()
+
     data = AnimBuddyData(license=license,
                          expiry=datetime.datetime.now() + datetime.timedelta(days=days))
     db.session.add(data)
@@ -176,7 +194,7 @@ def addLicense(user, email):
     updatedData.user = dbUser
     db.session.commit()
 
-    return {'result' : 'Generated'}
+    return {'result' : license}
 
 def validate(key):
     """
@@ -191,27 +209,6 @@ def validate(key):
         return {'result' : 'Valid'}
     elif (license.expiry - today).days + 1 < 0:
         return {'result' : 'Expired'}
-
-def oldvalidate(key):
-    """
-    key validation
-    """
-    today = datetime.date.today()
-    x = AnimBuddyData.query.filter_by(license = key).first()
-    #licenses = [x.license for x in AnimBuddyData.query.all()]
-    licenses = {'1111-2222-3333-4444':{'type':'permanent', 'expiryDate': datetime.date(2080, 12, 20)}, 'owner' : 'beaverhouse',
-                '1111-2222-3333-4446':{'type':'monthly',   'expiryDate': datetime.date(2019, 12, 5),   'owner' : 'Me'},
-                '1111-2222-3333-4445':{'type':'business',  'expiryDate': datetime.date(2080, 12, 7)},  'owner' : 'ho'}
-
-    if key in licenses.keys():
-        if (licenses[key]['expiryDate'] - today).days >= 0:
-            return {'result' : 'Valid'}
-        elif (licenses[key]['expiryDate'] - today).days < 0:
-            return {'result' : 'Expired'}
-
-    else:
-        return {'result' : 'Invalid'}
-
 
 @app.route('/license/<string:key>', methods=['GET'])
 def returnOne(key):
