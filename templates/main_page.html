@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" integrity="sha512-dTfge/zgoMYpP7QbHy4gWMEGsbsdZeCXz7irItjcC3sPUFtf0kuFbDz/ixG7ArTxmDjLXDmezHubeNikyKGVyQ==" crossorigin="anonymous">
-        <title>My scratchboard page</title>
+        <title>AnimBuddy Masterß</title>
     </head>
 
     <body>
@@ -66,22 +66,26 @@
                     </th>
                     <th>
                         {% if comment.user %}
-                            {{ comment.user.username }}
+                            <!--<a href="/usersTable">{{ comment.user.username }}</a>-->
+                            <form action="." method="POST">
+                            <input type="hidden" name = "userTab" value = {{comment.user}}>
+                            <input type="submit" class="btn btn-primary btn-sm" data-toggle="button" value="{{ comment.user.username }}">
+                            </form>
                         {% else %}
                             anonymous
                         {% endif %}
                     </th>
                     <th>
                         {% if comment.user %}
-                            {{ comment.user.email }}
+                           {{ comment.user.email }}
                         {% else %}
                             Null
                         {% endif %}
                     </th>
                     <th>
                         <form action="." method="POST">
-                        <input type="hidden" name = "id" value = {{comment.id}}>
-                        <input type="submit" class="btn btn-success" value="x">
+                        <input type="hidden" name = "delete" value = {{comment.id}}>
+                        <input type="submit" class="btn btn-warning btn-sm" value="x">
                         </form>
                     </th>
                 </tr>

@@ -77,19 +77,24 @@ def index():
                                 user=current_user)
         db.session.add(comment)
         db.session.commit()
-    elif "id" in request.form.to_dict():
-        comment = AnimBuddyData.query.filter_by(id=int(request.form["id"])).first()
+    elif "delete" in request.form.to_dict():
+        comment = AnimBuddyData.query.filter_by(id=int(request.form["delete"])).first()
         db.session.delete(comment)
         db.session.commit()
+    elif "userTab" in request.form.to_dict():
+        return redirect(url_for('usersTable'))
     return redirect(url_for('index'))
 
 @app.route("/usersTable", methods=["GET", "POST"])
-def usersTable():
+def usersTable(filter = ''):
+    """
+    @args fileter type User.id
+    """
     print(request.form.to_dict())
     if request.method == "GET":
         return render_template("user_page.html", comments=User.query.all())
-    elif "id" in request.form.to_dict():
-        comment = User.query.filter_by(id=int(request.form["id"])).first()
+    elif "delete" in request.form.to_dict():
+        comment = User.query.filter_by(id=int(request.form["delete"])).first()
         print(comment)
         db.session.delete(comment)
         db.session.commit()
